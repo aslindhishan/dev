@@ -1,0 +1,30 @@
+import pandas as pd
+import gradio as gr
+import ollama
+
+with open("movies.csv","r",encoding='utf-8',errors='ignore') as f:
+    movie_data = f.read()
+
+prompt = f"""
+    You are a movie recommendation Assistant
+    Find matching or similar books using title and genre
+    Generate AI explanation for each recommendation
+    Give responses from the dataset
+
+    dataset:
+    {movie_data}
+    """
+def recommend(message,history):
+    messages = [{"role":"system","content": prompt },
+               {"role":"user","content":message}]
+
+    for user_msg,bot_msg in history:
+        messages.append({"role":"system","content": bot_msg })
+        messages.append({"role":"user","content": user_msg })
+               
+        
+    response = ollama.chat(model='llama2',messages = messages)
+    return response['message']['content']
+
+print("Welcome to Book Recommendation System....!")
+gr.ChatInterface(fn=recommend,title="Movie Recommendation").launch()
